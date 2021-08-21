@@ -30,11 +30,5 @@ pipeline {
                 echo "cd ${MODULE} && ls -la && docker build -t johnasexton/${MODULE}:${TAG} ."
             }
         }
-        stage('Docker Publish') {
-            steps {
-                echo "pushing... to johnasexton/${MODULE} on https://hub.docker.com/u/johnasexton"
-                echo "docker push johnasexton/${MODULE}:${TAG}"
-            }
-        }
     }
 }
