@@ -1,9 +1,9 @@
 pipeline {
-    agent {
-        node {
-            label 'master'
-        }
-    }
+  agent {
+      node {
+          label 'master'
+      }
+  }
     stages {
         stage('GitHub checkout') {
             steps {
@@ -19,21 +19,22 @@ pipeline {
                 script {
                         // list files in ${workspace}
                         sh "ls -la ${workspace}"
+                        sh "ls -la ${workspace}/${MODULE}"
+                        stash includes: "${MODULE}/*", name: 'dockerfile'
+                        // archiveArtifacts artifacts: '*.log'
                     }
                 }
         }
-        stage('Docker Build') {
-            steps {
-                // docker steps
-                echo 'docker version'
-                echo "docker build -t johnasexton/${MODULE}:${TAG} -f ${MODULE}/Dockerfile"
-                echo "cd ${MODULE} && ls -la && docker build -t johnasexton/${MODULE}:${TAG} ."
-            }
-        }
-        stage('Docker Publish') {
-            steps {
-                echo "pushing... to johnasexton/${MODULE} on https://hub.docker.com/u/johnasexton"
-                echo "docker push johnasexton/${MODULE}:${TAG}"
+        stage('Docker Build in container') {
+          agent { kubernetes 'johnasexton-jenkins-agent' }
+                  steps {
+                    // unstash Dockerfile from previous stage
+                    unstash 'dockerfile'
+                    // docker build tag and push to docker hub
+                    sh "ls -la $workspace"
+                    echo "docker version"
+                    echo "docker build -t johnasexton/${MODULE}:${TAG} -f ."
+                    echo "docker push johnasexton/${MODULE}:${TAG}"
             }
         }
     }
