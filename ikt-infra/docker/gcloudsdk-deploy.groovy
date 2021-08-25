@@ -20,8 +20,8 @@ pipeline {
                         // list files in ${workspace}
                         sh "ls -la ${workspace}"
                         sh "ls -la ${workspace}/${MODULE}"
+                        // stash Dockerfile for next stage 
                         stash includes: "${MODULE}/*", name: 'dockerfile'
-                        // archiveArtifacts artifacts: '*.log'
                     }
                 }
         }
@@ -32,8 +32,10 @@ pipeline {
                     unstash 'dockerfile'
                     // docker build tag and push to docker hub
                     sh "ls -la $workspace"
+                    sh "ls -la $workspace/${MODULE}"
+                    echo 'which docker'
                     echo "docker version"
-                    echo "docker build -t johnasexton/${MODULE}:${TAG} -f ."
+                    echo "docker build -t johnasexton/${MODULE}:${TAG} -f $workspace/${MODULE}/Dockerfile"
                     echo "docker push johnasexton/${MODULE}:${TAG}"
             }
         }
